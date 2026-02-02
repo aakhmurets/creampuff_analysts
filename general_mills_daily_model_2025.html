@@ -1,0 +1,1204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>General Mills 2025 Daily Revenue Model | US Only</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 50%, #16213e 100%);
+            min-height: 100vh;
+            color: #e0e0e0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            padding: 30px 0;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            color: #fff;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #888;
+            font-size: 1rem;
+        }
+
+        .model-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #e94560, #0f3460);
+            padding: 8px 20px;
+            border-radius: 25px;
+            margin-top: 15px;
+            font-size: 0.85rem;
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .controls {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 25px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .control-group label {
+            font-size: 0.8rem;
+            color: #888;
+            text-transform: uppercase;
+        }
+
+        .control-group select, .control-group input {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            min-width: 150px;
+        }
+
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .kpi-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .kpi-value {
+            font-size: 1.6rem;
+            font-weight: bold;
+            color: #4da8da;
+        }
+
+        .kpi-value.retail { color: #4da8da; }
+        .kpi-value.ecommerce { color: #4ade80; }
+        .kpi-value.other { color: #fbbf24; }
+        .kpi-value.total { color: #fff; }
+
+        .kpi-label {
+            color: #888;
+            font-size: 0.8rem;
+            margin-top: 5px;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-title::before {
+            content: '';
+            width: 4px;
+            height: 18px;
+            background: linear-gradient(180deg, #4da8da, #e94560);
+            border-radius: 2px;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 350px;
+        }
+
+        .chart-container.large {
+            height: 450px;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 25px;
+        }
+
+        .event-calendar {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .event-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 12px;
+            border-radius: 8px;
+            border-left: 3px solid;
+        }
+
+        .event-item.high { border-color: #e94560; }
+        .event-item.medium { border-color: #fbbf24; }
+        .event-item.low { border-color: #4ade80; }
+
+        .event-date {
+            font-size: 0.75rem;
+            color: #888;
+        }
+
+        .event-name {
+            font-weight: 600;
+            color: #fff;
+            margin: 3px 0;
+        }
+
+        .event-impact {
+            font-size: 0.8rem;
+            color: #4da8da;
+        }
+
+        .methodology {
+            background: rgba(77, 168, 218, 0.1);
+            border: 1px solid rgba(77, 168, 218, 0.3);
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 30px;
+        }
+
+        .methodology h2 {
+            color: #4da8da;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .methodology-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .method-section h3 {
+            color: #fff;
+            font-size: 0.95rem;
+            margin-bottom: 10px;
+        }
+
+        .method-section ul {
+            list-style: none;
+            font-size: 0.85rem;
+            color: #aaa;
+        }
+
+        .method-section li {
+            padding: 4px 0;
+            padding-left: 15px;
+            position: relative;
+        }
+
+        .method-section li::before {
+            content: '•';
+            position: absolute;
+            left: 0;
+            color: #4da8da;
+        }
+
+        .assumptions {
+            background: rgba(248, 113, 113, 0.1);
+            border: 1px solid rgba(248, 113, 113, 0.3);
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 20px;
+        }
+
+        .assumptions h2 {
+            color: #f87171;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .assumptions ul {
+            list-style: none;
+        }
+
+        .assumptions li {
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 0.9rem;
+        }
+
+        .assumptions li:last-child {
+            border-bottom: none;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 0.85rem;
+        }
+
+        .data-table th, .data-table td {
+            padding: 10px;
+            text-align: right;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .data-table th {
+            color: #4da8da;
+            font-weight: 600;
+            text-align: left;
+        }
+
+        .data-table td:first-child {
+            text-align: left;
+        }
+
+        .data-table tr:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .sources {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .sources h3 {
+            color: #888;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+
+        .sources a {
+            color: #4da8da;
+            text-decoration: none;
+            font-size: 0.8rem;
+            display: inline-block;
+            margin-right: 15px;
+            margin-bottom: 5px;
+        }
+
+        .sources a:hover {
+            text-decoration: underline;
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px;
+            color: #666;
+            font-size: 0.8rem;
+        }
+
+        .legend-inline {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.85rem;
+        }
+
+        .legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+        }
+
+        .highlight-stat {
+            background: linear-gradient(135deg, rgba(233, 69, 96, 0.2), rgba(77, 168, 218, 0.2));
+            border-radius: 10px;
+            padding: 15px 20px;
+            margin: 15px 0;
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .highlight-item {
+            text-align: center;
+        }
+
+        .highlight-value {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .highlight-label {
+            font-size: 0.75rem;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>General Mills 2025 Daily Revenue Model</h1>
+            <p class="subtitle">Estimated US Daily Sales by Channel | Based on Seasonality, Events & Consumer Behavior</p>
+            <span class="model-badge">MODELED DATA - NOT OFFICIAL FIGURES</span>
+        </header>
+
+        <!-- Controls -->
+        <div class="controls">
+            <div class="control-group">
+                <label>View Period</label>
+                <select id="periodSelect" onchange="updateCharts()">
+                    <option value="year">Full Year 2025</option>
+                    <option value="q1">Q1 (Jan-Mar)</option>
+                    <option value="q2">Q2 (Apr-Jun)</option>
+                    <option value="q3">Q3 (Jul-Sep)</option>
+                    <option value="q4">Q4 (Oct-Dec)</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label>Chart Type</label>
+                <select id="chartType" onchange="updateCharts()">
+                    <option value="stacked">Stacked Area</option>
+                    <option value="line">Line Chart</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label>Aggregation</label>
+                <select id="aggregation" onchange="updateCharts()">
+                    <option value="daily">Daily</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly">Monthly</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- KPIs -->
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-value total" id="kpiTotal">$15.73B</div>
+                <div class="kpi-label">2025 US Total (Modeled)</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-value retail" id="kpiRetail">$12.89B</div>
+                <div class="kpi-label">Traditional Retail (82%)</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-value ecommerce" id="kpiEcom">$1.42B</div>
+                <div class="kpi-label">E-commerce (9%)</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-value other" id="kpiOther">$1.42B</div>
+                <div class="kpi-label">Foodservice/Other (9%)</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-value" id="kpiAvgDaily">$43.1M</div>
+                <div class="kpi-label">Avg Daily Revenue</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-value" id="kpiPeakDay" style="color: #e94560;">$68.2M</div>
+                <div class="kpi-label">Peak Day (Thanksgiving)</div>
+            </div>
+        </div>
+
+        <!-- Main Daily Chart -->
+        <div class="card">
+            <h2 class="card-title">Daily Revenue by Channel</h2>
+            <div class="chart-container large">
+                <canvas id="dailyRevenueChart"></canvas>
+            </div>
+            <div class="legend-inline">
+                <div class="legend-item"><div class="legend-dot" style="background: #4da8da;"></div> Traditional Retail</div>
+                <div class="legend-item"><div class="legend-dot" style="background: #4ade80;"></div> E-commerce</div>
+                <div class="legend-item"><div class="legend-dot" style="background: #fbbf24;"></div> Foodservice/Other</div>
+            </div>
+        </div>
+
+        <!-- Grid Charts -->
+        <div class="grid-2">
+            <!-- Monthly Breakdown -->
+            <div class="card">
+                <h2 class="card-title">Monthly Revenue by Channel</h2>
+                <div class="chart-container">
+                    <canvas id="monthlyChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Day of Week Pattern -->
+            <div class="card">
+                <h2 class="card-title">Day of Week Revenue Pattern</h2>
+                <div class="chart-container">
+                    <canvas id="dayOfWeekChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Seasonality Factors -->
+            <div class="card">
+                <h2 class="card-title">Seasonality Index by Month</h2>
+                <div class="chart-container">
+                    <canvas id="seasonalityChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Channel Mix Over Time -->
+            <div class="card">
+                <h2 class="card-title">Channel Mix % by Quarter</h2>
+                <div class="chart-container">
+                    <canvas id="channelMixChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Shopping Events Calendar -->
+        <div class="card">
+            <h2 class="card-title">Key Shopping Events & Impact Multipliers</h2>
+            <div class="highlight-stat">
+                <div class="highlight-item">
+                    <div class="highlight-value">+58%</div>
+                    <div class="highlight-label">Thanksgiving Week Lift</div>
+                </div>
+                <div class="highlight-item">
+                    <div class="highlight-value">+45%</div>
+                    <div class="highlight-label">Christmas Week Lift</div>
+                </div>
+                <div class="highlight-item">
+                    <div class="highlight-value">+35%</div>
+                    <div class="highlight-label">Super Bowl Week Lift</div>
+                </div>
+                <div class="highlight-item">
+                    <div class="highlight-value">-18%</div>
+                    <div class="highlight-label">Early June Dip</div>
+                </div>
+            </div>
+            <div class="event-calendar" id="eventCalendar"></div>
+        </div>
+
+        <!-- Monthly Data Table -->
+        <div class="card">
+            <h2 class="card-title">2025 Monthly Revenue Summary (Modeled)</h2>
+            <table class="data-table" id="monthlyTable">
+                <thead>
+                    <tr>
+                        <th>Month</th>
+                        <th>Traditional Retail</th>
+                        <th>E-commerce</th>
+                        <th>Foodservice/Other</th>
+                        <th>Total</th>
+                        <th>Seasonality Index</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <!-- Methodology -->
+        <div class="methodology">
+            <h2>Model Methodology</h2>
+            <div class="methodology-grid">
+                <div class="method-section">
+                    <h3>Base Revenue Calculation</h3>
+                    <ul>
+                        <li>FY2025 total revenue: $19.49B (reported)</li>
+                        <li>US-only estimate: ~$15.73B (81% of total)</li>
+                        <li>Excludes International segment (~$2.84B)</li>
+                        <li>Canada portion (~6% of NA Retail) excluded</li>
+                        <li>Daily baseline: $43.1M (365 days)</li>
+                    </ul>
+                </div>
+                <div class="method-section">
+                    <h3>Channel Mix Assumptions</h3>
+                    <ul>
+                        <li>Traditional Retail: 82% ($12.89B)</li>
+                        <li>E-commerce: 9% ($1.42B) - per GMI disclosures</li>
+                        <li>Foodservice/Other: 9% ($1.42B)</li>
+                        <li>E-commerce grows +15% in Q4 (holiday)</li>
+                        <li>Foodservice peaks in summer (+10%)</li>
+                    </ul>
+                </div>
+                <div class="method-section">
+                    <h3>Seasonality Factors</h3>
+                    <ul>
+                        <li>Jan-Feb: +8% (New Year resolutions, cereal peak)</li>
+                        <li>Mar-Apr: +3% (Easter baking)</li>
+                        <li>May-Jun: -8% (summer slump begins)</li>
+                        <li>Jul-Aug: -5% (vacation effect, back-to-school late Aug)</li>
+                        <li>Sep: +2% (school routines resume)</li>
+                        <li>Oct-Dec: +12-18% (holiday baking, entertaining)</li>
+                    </ul>
+                </div>
+                <div class="method-section">
+                    <h3>Day-of-Week Patterns</h3>
+                    <ul>
+                        <li>Saturday: 17% of weekly (peak shopping)</li>
+                        <li>Sunday: 15% of weekly</li>
+                        <li>Friday: 14.5% of weekly</li>
+                        <li>Mon-Thu: 13-14% each</li>
+                        <li>Paycheck effect: +5% on 1st & 15th</li>
+                    </ul>
+                </div>
+                <div class="method-section">
+                    <h3>Event Multipliers</h3>
+                    <ul>
+                        <li>Super Bowl week: +35%</li>
+                        <li>Valentine's week: +18%</li>
+                        <li>Easter week: +28%</li>
+                        <li>Memorial/July 4th/Labor Day: +12-15%</li>
+                        <li>Back-to-school (Aug 1-20): +20%</li>
+                        <li>Halloween week: +22%</li>
+                        <li>Thanksgiving week: +58%</li>
+                        <li>Christmas week: +45%</li>
+                    </ul>
+                </div>
+                <div class="method-section">
+                    <h3>Category Weighting</h3>
+                    <ul>
+                        <li>Cereal: Peaks Jan-Feb, dips Jun</li>
+                        <li>Snacks: Super Bowl, summer BBQ peaks</li>
+                        <li>Baking: Oct-Dec holiday peak (+40%)</li>
+                        <li>Yogurt: Steady year-round</li>
+                        <li>Pet Food: Consistent, slight Q4 bump</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Assumptions & Limitations -->
+        <div class="assumptions">
+            <h2>Critical Assumptions & Limitations</h2>
+            <ul>
+                <li><strong>This is a MODEL, not actual data.</strong> General Mills does not publicly disclose daily or weekly revenue figures. All daily values are estimated based on annual/quarterly actuals distributed using behavioral patterns.</li>
+                <li><strong>US-only approximation:</strong> North America segment includes Canada (~6-7%). We estimate US-only by excluding this portion, but precise split is not disclosed.</li>
+                <li><strong>Channel mix is estimated:</strong> E-commerce at 9% is based on GMI's disclosed "approximately 9% of sales" as of 2020, with modest growth assumed. Actual 2025 mix may differ.</li>
+                <li><strong>Seasonality patterns based on industry data:</strong> We applied CPG industry seasonal patterns (Circana, NRF data) and cereal-specific trends. Actual GMI seasonality may vary by brand/category.</li>
+                <li><strong>Event impacts are estimates:</strong> Multipliers for holidays/events based on retail industry benchmarks, not GMI-specific data. Actual lift varies by product category.</li>
+                <li><strong>Day-of-week patterns from general grocery data:</strong> Based on Gallup consumer spending and grocery industry patterns, not GMI-specific POS data.</li>
+                <li><strong>No promotional/pricing effects:</strong> Model assumes steady pricing. Actual sales spike during promotions (BOGO, coupons) are not captured.</li>
+                <li><strong>Foodservice timing simplified:</strong> Institutional (schools, hospitals) has different patterns vs. restaurants - model uses blended approach.</li>
+                <li><strong>Calendar 2025 ≠ Fiscal 2025:</strong> GMI's fiscal year ends in May. This model uses calendar year 2025 for simplicity.</li>
+            </ul>
+        </div>
+
+        <!-- Sources -->
+        <div class="sources">
+            <h3>Data Sources & References</h3>
+            <a href="https://investors.generalmills.com/financial-information/quarterly-results/default.aspx" target="_blank">General Mills Quarterly Results</a>
+            <a href="https://consumergoods.com/general-mills-readying-elevated-demand-e-com-grows-9-sales" target="_blank">Consumer Goods Technology - E-commerce Mix</a>
+            <a href="https://alliancesalesinc.com/the-impact-of-seasonality-on-cpg-sales/" target="_blank">Alliance Sales - CPG Seasonality</a>
+            <a href="https://www.snipp.com/blog/2017-07-05/whats-in-your-basket-consumer-shopping-habits-by-day-of-week" target="_blank">Snipp - Day of Week Patterns</a>
+            <a href="https://news.gallup.com/poll/123839/consumers-spend-more-weekends-payday-weeks.aspx" target="_blank">Gallup - Weekend/Paycheck Spending</a>
+            <a href="https://nrf.com/research-insights/retail-holiday-and-seasonal-trends" target="_blank">NRF - Holiday Retail Trends</a>
+            <a href="https://www.foodbusinessnews.net/articles/29219-general-mills-finds-winning-formula-for-foodservice" target="_blank">Food Business News - Foodservice</a>
+            <a href="https://www.pattern.com/blog/snack-foods-highs-and-lows" target="_blank">Pattern - Snack Seasonality</a>
+        </div>
+
+        <footer>
+            <p>Model built using publicly available financial data, industry research, and consumer behavior studies.</p>
+            <p>This visualization is for illustrative purposes only. Not investment advice. | Last updated: February 2026</p>
+        </footer>
+    </div>
+
+    <script>
+        // ============================================
+        // GENERAL MILLS 2025 DAILY REVENUE MODEL
+        // ============================================
+
+        // Base annual US revenue (estimated)
+        const ANNUAL_US_REVENUE = 15.73e9; // $15.73 billion US-only
+        const DAYS_IN_YEAR = 365;
+        const BASE_DAILY = ANNUAL_US_REVENUE / DAYS_IN_YEAR;
+
+        // Channel mix percentages
+        const CHANNEL_MIX = {
+            retail: 0.82,      // Traditional retail
+            ecommerce: 0.09,   // E-commerce
+            other: 0.09        // Foodservice/Other
+        };
+
+        // Monthly seasonality indices (1.0 = average)
+        const MONTHLY_SEASONALITY = {
+            0: 1.10,  // January - New Year resolutions, cereal peak
+            1: 1.08,  // February - Super Bowl, Valentine's
+            2: 1.03,  // March - Easter prep begins
+            3: 1.02,  // April - Easter, spring
+            4: 0.95,  // May - Summer starts, dip begins
+            5: 0.88,  // June - Summer slump
+            6: 0.92,  // July - Summer continues, July 4th
+            7: 0.98,  // August - Back to school ramp
+            8: 1.02,  // September - School routines
+            9: 1.08,  // October - Halloween, fall baking
+            10: 1.15, // November - Thanksgiving peak
+            11: 1.18  // December - Holiday peak
+        };
+
+        // Day of week multipliers (sum should ≈ 7)
+        const DAY_OF_WEEK = {
+            0: 1.05,  // Sunday
+            1: 0.91,  // Monday
+            2: 0.91,  // Tuesday
+            3: 0.95,  // Wednesday
+            4: 0.98,  // Thursday
+            5: 1.02,  // Friday
+            6: 1.18   // Saturday (peak)
+        };
+
+        // Shopping events with date ranges and multipliers
+        const SHOPPING_EVENTS = [
+            { name: 'New Year Week', start: '2025-01-01', end: '2025-01-05', mult: 1.25, impact: 'high' },
+            { name: 'Super Bowl Week', start: '2025-02-03', end: '2025-02-09', mult: 1.35, impact: 'high' },
+            { name: "Valentine's Week", start: '2025-02-10', end: '2025-02-14', mult: 1.18, impact: 'medium' },
+            { name: "Presidents' Day Weekend", start: '2025-02-15', end: '2025-02-17', mult: 1.10, impact: 'low' },
+            { name: 'Easter Week', start: '2025-04-14', end: '2025-04-20', mult: 1.28, impact: 'high' },
+            { name: 'Cinco de Mayo', start: '2025-05-03', end: '2025-05-05', mult: 1.08, impact: 'low' },
+            { name: "Mother's Day Week", start: '2025-05-05', end: '2025-05-11', mult: 1.12, impact: 'medium' },
+            { name: 'Memorial Day Week', start: '2025-05-22', end: '2025-05-26', mult: 1.15, impact: 'medium' },
+            { name: "Father's Day Week", start: '2025-06-09', end: '2025-06-15', mult: 1.08, impact: 'low' },
+            { name: 'July 4th Week', start: '2025-06-30', end: '2025-07-06', mult: 1.18, impact: 'medium' },
+            { name: 'Back to School Early', start: '2025-08-01', end: '2025-08-10', mult: 1.15, impact: 'medium' },
+            { name: 'Back to School Peak', start: '2025-08-11', end: '2025-08-24', mult: 1.22, impact: 'high' },
+            { name: 'Labor Day Week', start: '2025-08-28', end: '2025-09-01', mult: 1.15, impact: 'medium' },
+            { name: 'Halloween Week', start: '2025-10-25', end: '2025-10-31', mult: 1.22, impact: 'high' },
+            { name: 'Pre-Thanksgiving', start: '2025-11-17', end: '2025-11-23', mult: 1.30, impact: 'high' },
+            { name: 'Thanksgiving Week', start: '2025-11-24', end: '2025-11-30', mult: 1.58, impact: 'high' },
+            { name: 'Cyber Week', start: '2025-12-01', end: '2025-12-07', mult: 1.25, impact: 'medium' },
+            { name: 'Christmas Prep', start: '2025-12-15', end: '2025-12-21', mult: 1.35, impact: 'high' },
+            { name: 'Christmas Week', start: '2025-12-22', end: '2025-12-28', mult: 1.45, impact: 'high' },
+            { name: 'New Year Prep', start: '2025-12-29', end: '2025-12-31', mult: 1.20, impact: 'medium' }
+        ];
+
+        // Channel-specific seasonal adjustments
+        const CHANNEL_SEASONALITY = {
+            ecommerce: {
+                10: 1.15,  // November - Cyber deals
+                11: 1.20   // December - Holiday online shopping
+            },
+            other: {  // Foodservice
+                5: 1.10,   // June - Summer tourism
+                6: 1.12,   // July - Peak summer
+                7: 1.08,   // August - Late summer
+                8: 1.05    // September - School foodservice ramps
+            }
+        };
+
+        // Generate all 365 days of data
+        function generateDailyData() {
+            const data = [];
+            const startDate = new Date('2025-01-01');
+
+            for (let i = 0; i < DAYS_IN_YEAR; i++) {
+                const date = new Date(startDate);
+                date.setDate(startDate.getDate() + i);
+
+                const month = date.getMonth();
+                const dayOfWeek = date.getDay();
+                const dayOfMonth = date.getDate();
+
+                // Base daily revenue
+                let dailyTotal = BASE_DAILY;
+
+                // Apply monthly seasonality
+                dailyTotal *= MONTHLY_SEASONALITY[month];
+
+                // Apply day of week pattern
+                dailyTotal *= DAY_OF_WEEK[dayOfWeek];
+
+                // Apply paycheck effect (1st and 15th of month)
+                if (dayOfMonth === 1 || dayOfMonth === 15) {
+                    dailyTotal *= 1.05;
+                } else if (dayOfMonth === 2 || dayOfMonth === 16) {
+                    dailyTotal *= 1.03;
+                }
+
+                // Apply shopping event multipliers
+                const dateStr = date.toISOString().split('T')[0];
+                for (const event of SHOPPING_EVENTS) {
+                    if (dateStr >= event.start && dateStr <= event.end) {
+                        dailyTotal *= event.mult;
+                        break;
+                    }
+                }
+
+                // Split by channel with channel-specific adjustments
+                let retailPct = CHANNEL_MIX.retail;
+                let ecomPct = CHANNEL_MIX.ecommerce;
+                let otherPct = CHANNEL_MIX.other;
+
+                // E-commerce boost in Q4
+                if (CHANNEL_SEASONALITY.ecommerce[month]) {
+                    ecomPct *= CHANNEL_SEASONALITY.ecommerce[month];
+                    retailPct -= (ecomPct - CHANNEL_MIX.ecommerce) * 0.8;
+                }
+
+                // Foodservice boost in summer
+                if (CHANNEL_SEASONALITY.other[month]) {
+                    otherPct *= CHANNEL_SEASONALITY.other[month];
+                    retailPct -= (otherPct - CHANNEL_MIX.other) * 0.5;
+                }
+
+                // Normalize
+                const totalPct = retailPct + ecomPct + otherPct;
+
+                data.push({
+                    date: date,
+                    dateStr: dateStr,
+                    total: dailyTotal,
+                    retail: dailyTotal * (retailPct / totalPct),
+                    ecommerce: dailyTotal * (ecomPct / totalPct),
+                    other: dailyTotal * (otherPct / totalPct),
+                    month: month,
+                    dayOfWeek: dayOfWeek
+                });
+            }
+
+            return data;
+        }
+
+        // Aggregate data by period
+        function aggregateData(data, period) {
+            if (period === 'daily') return data;
+
+            const aggregated = [];
+
+            if (period === 'weekly') {
+                for (let i = 0; i < data.length; i += 7) {
+                    const week = data.slice(i, Math.min(i + 7, data.length));
+                    aggregated.push({
+                        date: week[0].date,
+                        dateStr: week[0].dateStr,
+                        total: week.reduce((s, d) => s + d.total, 0),
+                        retail: week.reduce((s, d) => s + d.retail, 0),
+                        ecommerce: week.reduce((s, d) => s + d.ecommerce, 0),
+                        other: week.reduce((s, d) => s + d.other, 0)
+                    });
+                }
+            } else if (period === 'monthly') {
+                const months = {};
+                data.forEach(d => {
+                    const key = d.date.getMonth();
+                    if (!months[key]) {
+                        months[key] = { date: new Date(2025, key, 1), total: 0, retail: 0, ecommerce: 0, other: 0 };
+                    }
+                    months[key].total += d.total;
+                    months[key].retail += d.retail;
+                    months[key].ecommerce += d.ecommerce;
+                    months[key].other += d.other;
+                });
+                for (let m = 0; m < 12; m++) {
+                    if (months[m]) aggregated.push(months[m]);
+                }
+            }
+
+            return aggregated;
+        }
+
+        // Filter data by quarter
+        function filterByPeriod(data, period) {
+            if (period === 'year') return data;
+
+            const quarters = {
+                q1: [0, 1, 2],
+                q2: [3, 4, 5],
+                q3: [6, 7, 8],
+                q4: [9, 10, 11]
+            };
+
+            return data.filter(d => quarters[period].includes(d.date.getMonth()));
+        }
+
+        // Format currency
+        function formatCurrency(value, decimals = 1) {
+            if (value >= 1e9) return '$' + (value / 1e9).toFixed(decimals) + 'B';
+            if (value >= 1e6) return '$' + (value / 1e6).toFixed(decimals) + 'M';
+            if (value >= 1e3) return '$' + (value / 1e3).toFixed(decimals) + 'K';
+            return '$' + value.toFixed(0);
+        }
+
+        // Generate all data
+        const allDailyData = generateDailyData();
+
+        // Charts
+        let dailyChart, monthlyChart, dayOfWeekChart, seasonalityChart, channelMixChart;
+
+        function initCharts() {
+            const ctx1 = document.getElementById('dailyRevenueChart').getContext('2d');
+            const ctx2 = document.getElementById('monthlyChart').getContext('2d');
+            const ctx3 = document.getElementById('dayOfWeekChart').getContext('2d');
+            const ctx4 = document.getElementById('seasonalityChart').getContext('2d');
+            const ctx5 = document.getElementById('channelMixChart').getContext('2d');
+
+            Chart.defaults.color = '#888';
+            Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.1)';
+
+            // Daily Revenue Chart
+            dailyChart = new Chart(ctx1, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [
+                        {
+                            label: 'Traditional Retail',
+                            data: [],
+                            borderColor: '#4da8da',
+                            backgroundColor: 'rgba(77, 168, 218, 0.3)',
+                            fill: true,
+                            tension: 0.3,
+                            pointRadius: 0
+                        },
+                        {
+                            label: 'E-commerce',
+                            data: [],
+                            borderColor: '#4ade80',
+                            backgroundColor: 'rgba(74, 222, 128, 0.3)',
+                            fill: true,
+                            tension: 0.3,
+                            pointRadius: 0
+                        },
+                        {
+                            label: 'Foodservice/Other',
+                            data: [],
+                            borderColor: '#fbbf24',
+                            backgroundColor: 'rgba(251, 191, 36, 0.3)',
+                            fill: true,
+                            tension: 0.3,
+                            pointRadius: 0
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: ctx => ctx.dataset.label + ': ' + formatCurrency(ctx.raw)
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            type: 'time',
+                            time: { unit: 'month' }
+                        },
+                        y: {
+                            stacked: true,
+                            ticks: {
+                                callback: v => formatCurrency(v)
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Monthly Chart
+            const monthlyData = aggregateData(allDailyData, 'monthly');
+            monthlyChart = new Chart(ctx2, {
+                type: 'bar',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                    datasets: [
+                        {
+                            label: 'Traditional Retail',
+                            data: monthlyData.map(d => d.retail),
+                            backgroundColor: '#4da8da'
+                        },
+                        {
+                            label: 'E-commerce',
+                            data: monthlyData.map(d => d.ecommerce),
+                            backgroundColor: '#4ade80'
+                        },
+                        {
+                            label: 'Foodservice/Other',
+                            data: monthlyData.map(d => d.other),
+                            backgroundColor: '#fbbf24'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top' }
+                    },
+                    scales: {
+                        x: { stacked: true },
+                        y: {
+                            stacked: true,
+                            ticks: { callback: v => formatCurrency(v) }
+                        }
+                    }
+                }
+            });
+
+            // Day of Week Chart
+            const dowData = [0, 1, 2, 3, 4, 5, 6].map(dow => {
+                const days = allDailyData.filter(d => d.dayOfWeek === dow);
+                return days.reduce((s, d) => s + d.total, 0) / days.length;
+            });
+
+            dayOfWeekChart = new Chart(ctx3, {
+                type: 'bar',
+                data: {
+                    labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+                    datasets: [{
+                        label: 'Avg Daily Revenue',
+                        data: dowData,
+                        backgroundColor: dowData.map((v, i) => i === 6 ? '#e94560' : i === 0 ? '#f472b6' : '#4da8da'),
+                        borderRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            ticks: { callback: v => formatCurrency(v) }
+                        }
+                    }
+                }
+            });
+
+            // Seasonality Chart
+            seasonalityChart = new Chart(ctx4, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                    datasets: [{
+                        label: 'Seasonality Index',
+                        data: Object.values(MONTHLY_SEASONALITY),
+                        borderColor: '#e94560',
+                        backgroundColor: 'rgba(233, 69, 96, 0.2)',
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 5,
+                        pointBackgroundColor: '#e94560'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        annotation: {
+                            annotations: {
+                                baseline: {
+                                    type: 'line',
+                                    yMin: 1,
+                                    yMax: 1,
+                                    borderColor: '#fff',
+                                    borderWidth: 1,
+                                    borderDash: [5, 5]
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            min: 0.8,
+                            max: 1.3,
+                            ticks: {
+                                callback: v => (v * 100).toFixed(0) + '%'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Channel Mix Chart
+            const quarterlyMix = ['Q1', 'Q2', 'Q3', 'Q4'].map((q, i) => {
+                const months = [i * 3, i * 3 + 1, i * 3 + 2];
+                const qData = allDailyData.filter(d => months.includes(d.month));
+                const total = qData.reduce((s, d) => s + d.total, 0);
+                return {
+                    retail: qData.reduce((s, d) => s + d.retail, 0) / total * 100,
+                    ecommerce: qData.reduce((s, d) => s + d.ecommerce, 0) / total * 100,
+                    other: qData.reduce((s, d) => s + d.other, 0) / total * 100
+                };
+            });
+
+            channelMixChart = new Chart(ctx5, {
+                type: 'bar',
+                data: {
+                    labels: ['Q1', 'Q2', 'Q3', 'Q4'],
+                    datasets: [
+                        {
+                            label: 'Traditional Retail',
+                            data: quarterlyMix.map(q => q.retail),
+                            backgroundColor: '#4da8da'
+                        },
+                        {
+                            label: 'E-commerce',
+                            data: quarterlyMix.map(q => q.ecommerce),
+                            backgroundColor: '#4ade80'
+                        },
+                        {
+                            label: 'Foodservice/Other',
+                            data: quarterlyMix.map(q => q.other),
+                            backgroundColor: '#fbbf24'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top' }
+                    },
+                    scales: {
+                        x: { stacked: true },
+                        y: {
+                            stacked: true,
+                            max: 100,
+                            ticks: { callback: v => v + '%' }
+                        }
+                    }
+                }
+            });
+
+            // Populate events calendar
+            populateEventsCalendar();
+
+            // Populate monthly table
+            populateMonthlyTable(monthlyData);
+
+            // Initial chart update
+            updateCharts();
+        }
+
+        function updateCharts() {
+            const period = document.getElementById('periodSelect').value;
+            const chartType = document.getElementById('chartType').value;
+            const aggregation = document.getElementById('aggregation').value;
+
+            let data = filterByPeriod(allDailyData, period);
+            data = aggregateData(data, aggregation);
+
+            // Update main chart
+            dailyChart.data.labels = data.map(d => d.date);
+            dailyChart.data.datasets[0].data = data.map(d => d.retail);
+            dailyChart.data.datasets[1].data = data.map(d => d.ecommerce);
+            dailyChart.data.datasets[2].data = data.map(d => d.other);
+
+            // Update chart type
+            const isStacked = chartType === 'stacked';
+            dailyChart.data.datasets.forEach(ds => {
+                ds.fill = isStacked;
+            });
+            dailyChart.options.scales.y.stacked = isStacked;
+
+            // Update time unit based on aggregation
+            if (aggregation === 'daily') {
+                dailyChart.options.scales.x.time.unit = period === 'year' ? 'month' : 'week';
+            } else if (aggregation === 'weekly') {
+                dailyChart.options.scales.x.time.unit = 'month';
+            } else {
+                dailyChart.options.scales.x.time.unit = 'month';
+            }
+
+            dailyChart.update();
+
+            // Update KPIs based on selected period
+            const totalRev = data.reduce((s, d) => s + d.total, 0);
+            const retailRev = data.reduce((s, d) => s + d.retail, 0);
+            const ecomRev = data.reduce((s, d) => s + d.ecommerce, 0);
+            const otherRev = data.reduce((s, d) => s + d.other, 0);
+            const avgDaily = period === 'year' ? totalRev / 365 : totalRev / data.length / (aggregation === 'daily' ? 1 : aggregation === 'weekly' ? 7 : 30);
+
+            document.getElementById('kpiTotal').textContent = formatCurrency(totalRev);
+            document.getElementById('kpiRetail').textContent = formatCurrency(retailRev);
+            document.getElementById('kpiEcom').textContent = formatCurrency(ecomRev);
+            document.getElementById('kpiOther').textContent = formatCurrency(otherRev);
+            document.getElementById('kpiAvgDaily').textContent = formatCurrency(avgDaily);
+        }
+
+        function populateEventsCalendar() {
+            const container = document.getElementById('eventCalendar');
+            container.innerHTML = SHOPPING_EVENTS.map(event => `
+                <div class="event-item ${event.impact}">
+                    <div class="event-date">${formatEventDate(event.start)} - ${formatEventDate(event.end)}</div>
+                    <div class="event-name">${event.name}</div>
+                    <div class="event-impact">+${((event.mult - 1) * 100).toFixed(0)}% lift</div>
+                </div>
+            `).join('');
+        }
+
+        function formatEventDate(dateStr) {
+            const d = new Date(dateStr);
+            return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        }
+
+        function populateMonthlyTable(monthlyData) {
+            const tbody = document.querySelector('#monthlyTable tbody');
+            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                               'July', 'August', 'September', 'October', 'November', 'December'];
+
+            tbody.innerHTML = monthlyData.map((m, i) => `
+                <tr>
+                    <td>${monthNames[i]}</td>
+                    <td>${formatCurrency(m.retail)}</td>
+                    <td>${formatCurrency(m.ecommerce)}</td>
+                    <td>${formatCurrency(m.other)}</td>
+                    <td><strong>${formatCurrency(m.total)}</strong></td>
+                    <td>${(MONTHLY_SEASONALITY[i] * 100).toFixed(0)}%</td>
+                </tr>
+            `).join('');
+        }
+
+        // Initialize on load
+        window.addEventListener('load', initCharts);
+    </script>
+</body>
+</html>
