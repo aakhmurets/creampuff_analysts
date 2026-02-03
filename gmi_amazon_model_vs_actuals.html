@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GMI Amazon Grocery: Model vs Actuals (2025)</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 100%);
+            min-height: 100vh;
+            color: #e0e0e0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            padding: 20px 0;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            color: #fff;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            color: #888;
+            font-size: 0.95rem;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            color: #fff;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 400px;
+        }
+
+        .chart-container.small {
+            height: 300px;
+        }
+
+        .input-section {
+            background: rgba(77, 168, 218, 0.1);
+            border: 1px solid rgba(77, 168, 218, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+
+        .input-section h3 {
+            color: #4da8da;
+            margin-bottom: 15px;
+            font-size: 1rem;
+        }
+
+        .input-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 10px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .input-group label {
+            font-size: 0.75rem;
+            color: #888;
+        }
+
+        .input-group input {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+            padding: 8px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            width: 100%;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #4da8da;
+        }
+
+        button {
+            background: linear-gradient(135deg, #4da8da, #0f3460);
+            color: #fff;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            margin-top: 15px;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .metric-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .metric-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .metric-value.good { color: #4ade80; }
+        .metric-value.warning { color: #fbbf24; }
+        .metric-value.bad { color: #f87171; }
+
+        .metric-label {
+            font-size: 0.8rem;
+            color: #888;
+            margin-top: 5px;
+        }
+
+        .variance-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+
+        .variance-table th, .variance-table td {
+            padding: 12px;
+            text-align: right;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .variance-table th {
+            color: #4da8da;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .variance-table td:first-child {
+            text-align: left;
+            font-weight: 500;
+        }
+
+        .variance-table tr:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .positive { color: #4ade80; }
+        .negative { color: #f87171; }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 25px;
+        }
+
+        .legend-inline {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.85rem;
+        }
+
+        .legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+        }
+
+        .insights {
+            background: rgba(251, 191, 36, 0.1);
+            border: 1px solid rgba(251, 191, 36, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .insights h3 {
+            color: #fbbf24;
+            margin-bottom: 15px;
+        }
+
+        .insights ul {
+            list-style: none;
+        }
+
+        .insights li {
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 0.9rem;
+        }
+
+        .insights li:last-child {
+            border-bottom: none;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>GMI Amazon Grocery: Model vs Actuals</h1>
+            <p class="subtitle">2025 Monthly Comparison | Enter your actual values below</p>
+        </header>
+
+        <!-- Input Section -->
+        <div class="input-section">
+            <h3>Enter Actual Monthly Revenue ($M) - Your data will update all charts</h3>
+            <div class="input-grid">
+                <div class="input-group">
+                    <label>January</label>
+                    <input type="number" id="actual-jan" step="0.1" placeholder="$M">
+                </div>
+                <div class="input-group">
+                    <label>February</label>
+                    <input type="number" id="actual-feb" step="0.1" placeholder="$M">
+                </div>
+                <div class="input-group">
+                    <label>March</label>
+                    <input type="number" id="actual-mar" step="0.1" placeholder="$M">
+                </div>
+                <div class="input-group">
+                    <label>April</label>
+                    <input type="number" id="actual-apr" step="0.1" placeholder="$M">
+                </div>
+                <div class="input-group">
+                    <label>May</label>
+                    <input type="number" id="actual-may" step="0.1" placeholder="$M">
+                </div>
+                <div class="input-group">
+                    <label>June</label>
+                    <input type="number" id="actual-jun" step="0.1" placeholder="$M">
+                </div>
+                <div class="input-group">
+                    <label>July</label>
+                    <input type="number" id="actual-jul" step="0.1" placeholder="$M">
+                </div>
+                <div class="input-group">
+                    <label>August</label>
+                    <input type="number" id="actual-aug" step="0.1" placeholder="$M">
+                </div>
+                <div class="input-group">
+                    <label>September</label>
+                    <input type="number" id="actual-sep" step="0.1" placeholder="$M">
+                </div>
+                <div class="input-group">
+                    <label>October</label>
+                    <input type="number" id="actual-oct" step="0.1" placeholder="$M">
+                </div>
+                <div class="input-group">
+                    <label>November</label>
+                    <input type="number" id="actual-nov" step="0.1" placeholder="$M">
+                </div>
+                <div class="input-group">
+                    <label>December</label>
+                    <input type="number" id="actual-dec" step="0.1" placeholder="$M">
+                </div>
+            </div>
+            <button onclick="updateCharts()">Update Charts</button>
+        </div>
+
+        <!-- Summary Metrics -->
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-value" id="totalActual">$280.0M</div>
+                <div class="metric-label">Actual Total</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value" id="totalModel">$280.0M</div>
+                <div class="metric-label">Model Total</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value good" id="mape">0%</div>
+                <div class="metric-label">MAPE (Mean Abs % Error)</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value" id="maxError">-</div>
+                <div class="metric-label">Largest Monthly Error</div>
+            </div>
+        </div>
+
+        <!-- Main Comparison Chart -->
+        <div class="card">
+            <h2 class="card-title">Monthly Revenue: Model vs Actuals</h2>
+            <div class="chart-container">
+                <canvas id="comparisonChart"></canvas>
+            </div>
+            <div class="legend-inline">
+                <div class="legend-item"><div class="legend-dot" style="background: #4da8da;"></div> Model Estimate</div>
+                <div class="legend-item"><div class="legend-dot" style="background: #e94560;"></div> Actual</div>
+            </div>
+        </div>
+
+        <!-- Grid Charts -->
+        <div class="grid-2">
+            <!-- Variance Chart -->
+            <div class="card">
+                <h2 class="card-title">Variance (Actual - Model)</h2>
+                <div class="chart-container small">
+                    <canvas id="varianceChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Percentage Error Chart -->
+            <div class="card">
+                <h2 class="card-title">Percentage Error by Month</h2>
+                <div class="chart-container small">
+                    <canvas id="errorChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detailed Table -->
+        <div class="card">
+            <h2 class="card-title">Detailed Monthly Comparison</h2>
+            <table class="variance-table">
+                <thead>
+                    <tr>
+                        <th>Month</th>
+                        <th>Model ($M)</th>
+                        <th>Actual ($M)</th>
+                        <th>Variance ($M)</th>
+                        <th>% Error</th>
+                        <th>Key Events</th>
+                    </tr>
+                </thead>
+                <tbody id="varianceTableBody">
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Insights -->
+        <div class="insights" id="insightsSection">
+            <h3>Model Error Analysis</h3>
+            <ul id="insightsList">
+                <li>Enter actual values above to see error analysis</li>
+            </ul>
+        </div>
+
+        <footer>
+            <p>GMI Amazon Grocery Model Validation | Data comparison tool</p>
+        </footer>
+    </div>
+
+    <script>
+        // Model estimates (from corrected model)
+        const modelEstimates = {
+            jan: 21.9,
+            feb: 18.4,
+            mar: 21.0,
+            apr: 25.7,
+            may: 22.6,
+            jun: 19.4,
+            jul: 22.2,
+            aug: 24.3,
+            sep: 28.0,
+            oct: 27.1,
+            nov: 25.7,
+            dec: 24.3
+        };
+
+        // Default actuals (estimated from visual pattern - user can override)
+        let actuals = {
+            jan: 21.3,
+            feb: 17.0,
+            mar: 20.1,
+            apr: 26.5,
+            may: 22.5,
+            jun: 18.4,
+            jul: 21.8,
+            aug: 24.8,
+            sep: 28.9,
+            oct: 27.9,
+            nov: 27.2,
+            dec: 23.6
+        };
+
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const monthKeys = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+        const events = [
+            'Post-holiday',
+            'Shortest month',
+            'Spring prep',
+            'Easter',
+            'Pre-summer',
+            'Summer trough',
+            'Prime Day',
+            'Back-to-school',
+            'BTS Peak',
+            'Prime Big Deal',
+            'Turkey 12',
+            'Holiday/T12 end'
+        ];
+
+        // Chart instances
+        let comparisonChart, varianceChart, errorChart;
+
+        // Initialize
+        function init() {
+            // Set default values in inputs
+            monthKeys.forEach(key => {
+                document.getElementById(`actual-${key}`).value = actuals[key];
+            });
+
+            initCharts();
+            updateCharts();
+        }
+
+        function initCharts() {
+            Chart.defaults.color = '#888';
+            Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.1)';
+
+            // Main comparison chart
+            const ctx1 = document.getElementById('comparisonChart').getContext('2d');
+            comparisonChart = new Chart(ctx1, {
+                type: 'bar',
+                data: {
+                    labels: months,
+                    datasets: [
+                        {
+                            label: 'Model Estimate',
+                            data: Object.values(modelEstimates),
+                            backgroundColor: 'rgba(77, 168, 218, 0.7)',
+                            borderColor: '#4da8da',
+                            borderWidth: 2,
+                            borderRadius: 4,
+                            order: 2
+                        },
+                        {
+                            label: 'Actual',
+                            data: Object.values(actuals),
+                            backgroundColor: 'rgba(233, 69, 96, 0.7)',
+                            borderColor: '#e94560',
+                            borderWidth: 2,
+                            borderRadius: 4,
+                            order: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            min: 10,
+                            ticks: {
+                                callback: v => '$' + v + 'M'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Variance chart
+            const ctx2 = document.getElementById('varianceChart').getContext('2d');
+            varianceChart = new Chart(ctx2, {
+                type: 'bar',
+                data: {
+                    labels: months,
+                    datasets: [{
+                        label: 'Variance',
+                        data: [],
+                        backgroundColor: [],
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            ticks: {
+                                callback: v => (v > 0 ? '+' : '') + v.toFixed(1) + 'M'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Error chart
+            const ctx3 = document.getElementById('errorChart').getContext('2d');
+            errorChart = new Chart(ctx3, {
+                type: 'bar',
+                data: {
+                    labels: months,
+                    datasets: [{
+                        label: '% Error',
+                        data: [],
+                        backgroundColor: [],
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            ticks: {
+                                callback: v => (v > 0 ? '+' : '') + v.toFixed(0) + '%'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateCharts() {
+            // Read values from inputs
+            monthKeys.forEach(key => {
+                const val = parseFloat(document.getElementById(`actual-${key}`).value);
+                if (!isNaN(val)) {
+                    actuals[key] = val;
+                }
+            });
+
+            // Calculate variances and errors
+            const variances = [];
+            const pctErrors = [];
+            const absErrors = [];
+
+            monthKeys.forEach(key => {
+                const variance = actuals[key] - modelEstimates[key];
+                const pctError = ((actuals[key] - modelEstimates[key]) / actuals[key]) * 100;
+                variances.push(variance);
+                pctErrors.push(pctError);
+                absErrors.push(Math.abs(pctError));
+            });
+
+            // Update comparison chart
+            comparisonChart.data.datasets[1].data = Object.values(actuals);
+            comparisonChart.update();
+
+            // Update variance chart
+            varianceChart.data.datasets[0].data = variances;
+            varianceChart.data.datasets[0].backgroundColor = variances.map(v =>
+                v >= 0 ? 'rgba(74, 222, 128, 0.7)' : 'rgba(248, 113, 113, 0.7)'
+            );
+            varianceChart.update();
+
+            // Update error chart
+            errorChart.data.datasets[0].data = pctErrors;
+            errorChart.data.datasets[0].backgroundColor = pctErrors.map(v =>
+                Math.abs(v) <= 5 ? 'rgba(74, 222, 128, 0.7)' :
+                Math.abs(v) <= 10 ? 'rgba(251, 191, 36, 0.7)' : 'rgba(248, 113, 113, 0.7)'
+            );
+            errorChart.update();
+
+            // Update metrics
+            const totalActual = Object.values(actuals).reduce((a, b) => a + b, 0);
+            const totalModel = Object.values(modelEstimates).reduce((a, b) => a + b, 0);
+            const mape = absErrors.reduce((a, b) => a + b, 0) / absErrors.length;
+            const maxErrorIdx = absErrors.indexOf(Math.max(...absErrors));
+
+            document.getElementById('totalActual').textContent = '$' + totalActual.toFixed(1) + 'M';
+            document.getElementById('totalModel').textContent = '$' + totalModel.toFixed(1) + 'M';
+
+            const mapeEl = document.getElementById('mape');
+            mapeEl.textContent = mape.toFixed(1) + '%';
+            mapeEl.className = 'metric-value ' + (mape <= 5 ? 'good' : mape <= 10 ? 'warning' : 'bad');
+
+            document.getElementById('maxError').textContent = months[maxErrorIdx] + ' (' + pctErrors[maxErrorIdx].toFixed(1) + '%)';
+
+            // Update table
+            const tbody = document.getElementById('varianceTableBody');
+            tbody.innerHTML = monthKeys.map((key, i) => `
+                <tr>
+                    <td>${months[i]}</td>
+                    <td>$${modelEstimates[key].toFixed(1)}M</td>
+                    <td>$${actuals[key].toFixed(1)}M</td>
+                    <td class="${variances[i] >= 0 ? 'positive' : 'negative'}">${variances[i] >= 0 ? '+' : ''}${variances[i].toFixed(1)}M</td>
+                    <td class="${Math.abs(pctErrors[i]) <= 5 ? 'positive' : Math.abs(pctErrors[i]) <= 10 ? '' : 'negative'}">${pctErrors[i] >= 0 ? '+' : ''}${pctErrors[i].toFixed(1)}%</td>
+                    <td style="color: #888; font-size: 0.8rem;">${events[i]}</td>
+                </tr>
+            `).join('');
+
+            // Update insights
+            updateInsights(variances, pctErrors, absErrors);
+        }
+
+        function updateInsights(variances, pctErrors, absErrors) {
+            const insights = [];
+
+            // Find biggest misses
+            const sortedByError = monthKeys.map((key, i) => ({ month: months[i], error: pctErrors[i], absError: absErrors[i] }))
+                .sort((a, b) => b.absError - a.absError);
+
+            insights.push(`<strong>Largest error:</strong> ${sortedByError[0].month} at ${sortedByError[0].error.toFixed(1)}% - Model ${sortedByError[0].error < 0 ? 'overestimated' : 'underestimated'}`);
+            insights.push(`<strong>Second largest:</strong> ${sortedByError[1].month} at ${sortedByError[1].error.toFixed(1)}%`);
+
+            // Systematic bias check
+            const overCount = pctErrors.filter(e => e < 0).length;
+            const underCount = pctErrors.filter(e => e > 0).length;
+            if (overCount >= 8) {
+                insights.push(`<strong>Systematic bias:</strong> Model tends to overestimate (${overCount}/12 months)`);
+            } else if (underCount >= 8) {
+                insights.push(`<strong>Systematic bias:</strong> Model tends to underestimate (${underCount}/12 months)`);
+            }
+
+            // Seasonal pattern check
+            const q1Errors = absErrors.slice(0, 3);
+            const q2Errors = absErrors.slice(3, 6);
+            const q3Errors = absErrors.slice(6, 9);
+            const q4Errors = absErrors.slice(9, 12);
+
+            const avgQ1 = q1Errors.reduce((a, b) => a + b, 0) / 3;
+            const avgQ2 = q2Errors.reduce((a, b) => a + b, 0) / 3;
+            const avgQ3 = q3Errors.reduce((a, b) => a + b, 0) / 3;
+            const avgQ4 = q4Errors.reduce((a, b) => a + b, 0) / 3;
+
+            const quarters = [
+                { name: 'Q1', avg: avgQ1 },
+                { name: 'Q2', avg: avgQ2 },
+                { name: 'Q3', avg: avgQ3 },
+                { name: 'Q4', avg: avgQ4 }
+            ].sort((a, b) => b.avg - a.avg);
+
+            insights.push(`<strong>Worst quarter:</strong> ${quarters[0].name} with ${quarters[0].avg.toFixed(1)}% avg error`);
+            insights.push(`<strong>Best quarter:</strong> ${quarters[3].name} with ${quarters[3].avg.toFixed(1)}% avg error`);
+
+            // Event impact assessment
+            const primeJulyError = absErrors[6];
+            const primeBigDealError = absErrors[9];
+            const turkey12Error = absErrors[10];
+
+            if (primeJulyError > 10 || primeBigDealError > 10 || turkey12Error > 10) {
+                insights.push(`<strong>Event modeling issue:</strong> Large errors during promotional months suggest event lift assumptions need adjustment`);
+            }
+
+            document.getElementById('insightsList').innerHTML = insights.map(i => `<li>${i}</li>`).join('');
+        }
+
+        // Initialize on load
+        window.addEventListener('load', init);
+    </script>
+</body>
+</html>
